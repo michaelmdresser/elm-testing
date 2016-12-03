@@ -22,7 +22,7 @@ update msg model =
         MorePlease ->
             (model, getRandomGif model.topic)
 
-        NewGif (Ok, newUrl) ->
+        NewGif (Ok newUrl) ->
             ( { model | gifUrl = newUrl }, Cmd.none)
 
         NewGif (Err _) ->
@@ -38,3 +38,19 @@ view model =
         , img [src model.gifUrl] []
         , button [ onClick MorePlease ] [ text "More Please!" ]
         ]
+
+
+getRandomGif : String -> Cmd Msg
+getRandomGif topic =
+  let
+    url =
+      "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" ++ topic
+
+    request =
+      Http.get url decodeGifUrl
+  in
+    Http.send NewGif request
+
+decodeGifUrl : Json.Decoder String
+decodeGifUrl =
+  Json.at ["data", "image_url"] Json.string
